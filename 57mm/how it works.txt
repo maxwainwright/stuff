@@ -1,0 +1,38 @@
+How the 57mm synth program works
+
+The 57mm synth is a wavetable synth. This means, that a waveform has been stored (in the form of numbers) in the code - in a table. This table is read in different ways and at different rates, and output as sound. The wave in question is a sine wave, a clean tone with no harmonics (if it is read straightforwardly). 
+
+How it is read, and how fast, are the synthesis parameters. How fast it is read is straightforward: faster reading means a higher pitch. But there is also HOW it is read. The waveform has (or rather is) 256 values. The most straightforward way to read through them is to simply increment: value 1, value 2, value 3, value 4, value 5 --> 256, and then loop back to value 1. Other ways of reading are value 1, value 3, value 9, value 27, value 81 - multiplication with three. If you read it like this, you’re not really getting a sine wave any more. Other ways are possible.
+
+A manifesto has also been stored in memory (in the EEPROM). This consists of 1024 characters. Represented as numbers using the Extended ASCII character encoding scheme, they occupy the range between 32 and 255. 32, for instance, is the space character ( ). The english alphabet, numbers and common characters only go up to 127, some more esoteric characters are within the 128-255 range. For instance, a latin small letter n with tilde (frequently used in Spanish), has the ASCII number 241, the Euro sign has the number 128, and so on. ASCII is American, so the dollar sign is in standard ASCII, at number 36.
+
+So, this manifesto has been stored in memory. Each character takes up one byte (255 = 11111111 in binary), and the memory has room for 1024 bytes (one Kilobyte). Each byte has an address, a place in the memory, from 0-1023 (computers count from zero). When the synth is turned on, the program starts reading from the beginning of the memory - from the beginning of the text.
+
+Which character this turns out to be, i.e. if it is an "A" or an "a" or a " " or a "#" or an "x", determines how the synth is now controlled and produces sound. For instance, it might use the touch to set the frequency for reading the wavetable, and use the sound coming into the microphone to somehow affect how the wavetable is read. 
+
+There is also a button. When it is pressed, the address at which the memory is read is updated (forward one step). The synth then tells itself the buttons is not pressed any more, and goes on to read the next character in memory is read, determining the synthesis parameters. So, there are two states: one is when the button is pressed, and one is when it is not pressed. The one when the button is pressed is very, very short.
+
+So, this is the program flow:
+
+(synth is turned on)
+read a character from the manifesto at address 0
+character number determines settings
+play sound 
+until ...
+
+(button is pressed)
+change the address to read at
+jump straight back to ...
+
+read a character from the manifesto at next address
+character number determines  settings
+play sound until ...
+
+(button is pressed)
+change the address to read at
+jump straight back to ...
+
+etc.
+
+
+Max Wainwright/John Richards 2018
